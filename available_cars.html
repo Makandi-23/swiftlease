@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Available Cars</title>
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #222;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      color: orange;
+      font-size: 36px;
+      margin: 10px 0;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #bbb;
+    }
+
+    .car-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .car-card {
+      background-color: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .car-card:hover {
+      transform: scale(1.05);
+    }
+
+    .car-image img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .car-details {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .car-details h3 {
+      font-size: 22px;
+      color: orange;
+      margin-bottom: 10px;
+    }
+
+    .car-details p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .btn-book {
+      background-color: orange;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-top: 15px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-book:hover {
+      background-color: #ff7b00;
+    }
+
+    .error {
+      text-align: center;
+      font-size: 18px;
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Available Cars for Rent</h1>
+    <p>Select a car that fits your needs from the list below.</p>
+  </header>
+
+  <div class="car-container" id="car-container">
+    
+  </div>
+
+  <div id="error" class="error"></div>
+
+  <script>
+    fetch('cars.php')
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to fetch cars');
+        return response.json();
+      })
+      .then((cars) => {
+        const carContainer = document.getElementById('car-container');
+        if (cars.length === 0) {
+          document.getElementById('error').innerText = 'No cars available at the moment.';
+          return;
+        }
+
+        cars.forEach((car) => {
+          const carCard = document.createElement('div');
+          carCard.classList.add('car-card');
+
+          carCard.innerHTML = `
+            <div class="car-image">
+              <img src="${car.image_url}" alt="${car.model}">
+            </div>
+            <div class="car-details">
+              <h3>  ${car.model}</h3>
+              <p><strong>Size:</strong> ${car.size}</p>
+              <p><strong>Charge:</strong> KSh ${car.estimated_daily_charge}</p>
+              <p><strong>Contact:</strong> ${car.owner_contact}</p>
+              <p><strong>Status:</strong> ${car.available ? 'Available' : 'Not Available'}</p>
+              <button class="btn-book" onclick="bookCar(${car.id}, '${car.model}', ${car.estimated_daily_charge})">Book Now</button>
+            </div>`;
+          carContainer.appendChild(carCard);
+        });
+      })
+      .catch((error) => {
+        document.getElementById('error').innerText = 'Failed to load cars.';
+        console.error(error);
+      });
+
+    function bookCar(carId, model, charge) {
+      const encodedModel = encodeURIComponent(model);
+      const url = `book.html?car_id=${carId}&model=${encodedModel}&charge=${charge}`;
+
+      window.location.href = url;
+    }
+  </script>
+
+</body>
+
+</html>
